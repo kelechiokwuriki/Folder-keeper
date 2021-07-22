@@ -103,5 +103,27 @@ exports.update = (req, res) => {
 
 // Delete a folder with the specified id in the request
 exports.delete = (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).send({
+            success: false,
+            message: 'Folder id needed for update'
+        });
+    }
 
+    let folderId = req.params.id;
+
+    Folder.findByIdAndRemove(folderId)
+    .then(folder => {
+        if(!folder) {
+            return res.status(404).send({
+                success: false,
+                message: `Folder not found with id ${folderId}`
+            });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: 'Folder deleted successfully',
+        });
+    })
 };
