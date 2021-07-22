@@ -1,6 +1,6 @@
 const File = require('../models/file.model.js');
 
-// Create a folder
+// Create a file
 exports.create = (req, res) => {
     // validate request
     if (!req.body.name) {
@@ -74,7 +74,7 @@ exports.create = (req, res) => {
     })
 };
 
-// Retrieve and return all folders.
+// Retrieve and return all files.
 exports.all = async (req, res) => {
     File.find().populate("folder").populate("subFolder")
     .then(files => {
@@ -95,53 +95,49 @@ exports.all = async (req, res) => {
 // Update a folder identified by the noteId in the request
 exports.update = (req, res) => {
     // validate request
-    if (!req.body.name) {
+    if (!req.body.name && !req.params.id) {
         return res.status(400).send({
             success: false,
-            message: 'Folder name cannot be empty'
+            message: 'File name or id cannot be empty'
         });
     }
 
-    if (!req.params.id) {
-        return res.status(400).send({
-            success: false,
-            message: 'Folder id needed for update'
-        });
-    }
-
-    let folderId = req.params.id;
+    let fileId = req.params.id;
     let name = req.body.name;
 
-    Folder.findByIdAndUpdate(folderId, {
+    File.findByIdAndUpdate(fileId, {
         name: name || 'Untitled'
     }, { new: true })
-    .then(folder => {
-        if (!folder) {
+    .then(file => {
+        if (!file) {
             return res.status(404).send({
                 success: false,
-                message: `Folder not found with id ${folderId}`
+                message: `File not found with id ${fileId}`
             })
         }
 
         res.status(201).send({
             success: true,
-            message: 'Folder updated successfully',
-            data: folder
+            message: 'File updated successfully',
+            data: file
         });
     }).catch(error => {
+        console.log(error);
+
         if(error.kind === 'ObjectId') {
             return res.status(404).send({
                 success: false,
-                message: `Folder not found with id ${folderId}`
+                message: `File not found with id ${fileId}`
             })               
         }
         return res.status(500).send({
-            message: `Error updating folder with id ${folderId}`
+            message: `Error updating file with id ${fileId}`,
+            error: error
         });
     })
 };
 
-// Delete a folder with the specified id in the request
+// Delete a file with the specified id in the request
 exports.delete = (req, res) => {
     if (!req.params.id) {
         return res.status(400).send({
@@ -165,50 +161,5 @@ exports.delete = (req, res) => {
             success: true,
             message: 'File deleted successfully',
         });
-    })
-};
-
-exports.createSubFolder = async (req, res) => {    
-    if (!req.body.name || !req.body.folder) {
-        return res.status(400).send({
-            success: false,
-            message: 'Subfolder name or folder id cannot be empty'
-        });
-    }
-
-    const folderId = req.body.folder;
-    const name = req.body.name;
-
-    const folder = await Folder.findOne({_id: folderId});
-
-    if (!folder) {
-        return res.status(500).send({
-            success: false,
-            message: `Folder with ${folderId} does not exist. Unable to create sub-folder`
-        })
-    }
-
-    const subFolder = new SubFolder({ 
-        name: name || 'Untitled' ,
-        folder: req.body.folder
-    })
-
-    subFolder.save()
-    .then(async subFolderCreated => {
-        // associate folder with subfolder
-        folder.subFolders.push(subFolderCreated.id);
-        folder.save();
-
-        res.status(201).send({
-            success: true,
-            message: 'Subfolder created successfully',
-            data: subFolderCreated
-        });
-    }).catch(error => {
-        res.status(500).send({
-            success: false,
-            message: 'Failed to create the sub folder',
-            error: error
-        })
     })
 };

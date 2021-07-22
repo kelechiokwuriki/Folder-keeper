@@ -51,17 +51,10 @@ exports.all = async (req, res) => {
 // Update a folder identified by the noteId in the request
 exports.update = (req, res) => {
     // validate request
-    if (!req.body.name) {
+    if (!req.body.name && !req.params.id) {
         return res.status(400).send({
             success: false,
-            message: 'Folder name cannot be empty'
-        });
-    }
-
-    if (!req.params.id) {
-        return res.status(400).send({
-            success: false,
-            message: 'Folder id needed for update'
+            message: 'Folder name or id cannot be empty'
         });
     }
 
@@ -92,7 +85,8 @@ exports.update = (req, res) => {
             })               
         }
         return res.status(500).send({
-            message: `Error updating folder with id ${folderId}`
+            message: `Error updating folder with id ${folderId}`,
+            error: error
         });
     })
 };
