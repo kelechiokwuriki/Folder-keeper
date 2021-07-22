@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const FolderSchema = mongoose.Schema({
     name: String,
+    subFolders: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SubFolder"
+    }]
 }, {
     timestamps: true
 });

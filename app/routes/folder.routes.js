@@ -8,11 +8,14 @@ module.exports = (app) => {
     app.get('/folders', folderController.all);
 
     // get single folder
-    app.get('/folders/:id', folderController.findOne);
+    // app.get('/folders/:id', folderController.findOne);
 
     // update a single folder
     app.put('/folders/:id', folderController.update);
 
     //delete folder
     app.delete('/folders/:id', folderController.delete);
+
+    //sub folders
+    app.post('/folders/subfolder', folderController.createSubFolder);
 }

@@ -1,4 +1,5 @@
 const Folder = require('../models/folder.model.js');
+const SubFolder = require('../models/subfolder.model.js');
 
 // Create a folder
 exports.create = (req, res) => {
@@ -29,9 +30,9 @@ exports.create = (req, res) => {
 };
 
 // Retrieve and return all folders.
-exports.all = (req, res) => {
+exports.all = async (req, res) => {
     /**&&&&&&&&&&&&&&&& INCLUDE COUNT OF FILES IN FOLDERS AND SUB FOLDERS*/
-    Folder.find()
+    Folder.find().populate("subFolders")
     .then(folders => {
         res.status(200).send({
             success: true,
@@ -45,11 +46,6 @@ exports.all = (req, res) => {
             error: error
         });
     })
-};
-
-// Find a folder note with a folder id
-exports.findOne = (req, res) => {
-
 };
 
 // Update a folder identified by the noteId in the request
@@ -126,4 +122,49 @@ exports.delete = (req, res) => {
             message: 'Folder deleted successfully',
         });
     })
+};
+
+exports.createSubFolder = async (req, res) => {    
+    if (!req.body.name || !req.body.folder) {
+        return res.status(400).send({
+            success: false,
+            message: 'Subfolder name or folder id cannot be empty'
+        });
+    }
+
+    const folderId = req.body.folder;
+    const name = req.body.name;
+
+    const folder = await Folder.findOne({_id: folderId});
+
+    if (!folder) {
+        return res.status(500).send({
+            success: false,
+            message: `Folder with ${folderId} does not exist. Unable to create sub-folder`
+        })
+    }
+
+    const subFolder = new SubFolder({ 
+        name: name || 'Untitled' ,
+        folder: req.body.folder
+    })
+
+    subFolder.save()
+    .then(async subFolderCreated => {
+        folder.subFolders.push(subFolderCreated.id);
+        folder.save();
+
+        res.status(201).send({
+            success: true,
+            message: 'Subfolder created successfully',
+            data: subFolderCreated
+        });
+    }).catch(error => {
+        res.status(500).send({
+            success: false,
+            message: 'Failed to create the sub folder',
+            error: error
+        })
+    })
+
 };
