@@ -6,23 +6,69 @@ exports.create = (req, res) => {
     if (!req.body.name) {
         return res.status(400).send({
             success: false,
-            message: 'Folder name cannot be empty'
+            message: 'File name cannot be empty'
         });
     }
 
-    const newFolder = new Folder({ name: req.body.name || 'Untitled' })
+    const folderType = req.query.folderType;
 
-    newFolder.save()
-    .then(folder => {
+    if (!folderType) {
+        return res.status(400).send({
+            success: false,
+            message: 'Please specfiy folder type'
+        });
+    }
+
+    let newFile;
+
+    switch (folderType) {
+        case 'folder': {
+            if (!req.body.folder) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'File needs a folder'
+                });
+            }
+            newFile = new File({ 
+                name: req.body.name || 'Untitled',
+                folder: req.body.folder,
+            });
+        }
+        break;
+
+        case 'subFolder': {
+            if (!req.body.subFolder) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'File needs a sub folder'
+                });
+            }
+            newFile = new File({ 
+                name: req.body.name || 'Untitled',
+                subFolder: req.body.subFolder,
+            });
+        }
+        break;
+
+        default:
+            return res.status(400).send({
+                success: false,
+                message: 'Folder type not recognized'
+            });
+
+    }
+
+    newFile.save()
+    .then(file => {
         res.status(201).send({
             success: true,
-            message: 'Folder created successfully',
-            data: folder
+            message: 'File created successfully',
+            data: file
         });
     }).catch(error => {
         res.status(500).send({
             success: false,
-            message: 'Failed to create the folder',
+            message: 'Failed to create the file',
             error: error
         })
     })

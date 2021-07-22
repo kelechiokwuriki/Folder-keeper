@@ -19,6 +19,7 @@ mongoose.connect(dbConfig.url, {
 });
 
 require('./app/routes/folder.routes.js')(app);
+require('./app/routes/file.routes.js')(app);
 
 app.listen(3000, () => {
     console.log('API running on port 3000');
