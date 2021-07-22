@@ -92,7 +92,7 @@ exports.all = async (req, res) => {
     })
 };
 
-// Update a folder identified by the noteId in the request
+// Update file 
 exports.update = (req, res) => {
     // validate request
     if (!req.body.name && !req.params.id) {
