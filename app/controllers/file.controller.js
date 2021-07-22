@@ -76,18 +76,17 @@ exports.create = (req, res) => {
 
 // Retrieve and return all folders.
 exports.all = async (req, res) => {
-    /**&&&&&&&&&&&&&&&& INCLUDE COUNT OF FILES IN FOLDERS AND SUB FOLDERS*/
-    Folder.find().populate("subFolders")
-    .then(folders => {
+    File.find().populate("folder").populate("subFolder")
+    .then(files => {
         res.status(200).send({
             success: true,
-            message: 'All folders retrieved',
-            data: folders
+            message: 'All files retrieved',
+            data: files
         });
     }).catch(error => {
         res.status(500).send({
             success: false,
-            message: 'Failed to retrieve all folders',
+            message: 'Failed to retrieve all files',
             error: error
         });
     })
