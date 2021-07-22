@@ -1,5 +1,4 @@
-const Folder = require('../models/folder.model.js');
-const SubFolder = require('../models/subfolder.model.js');
+const File = require('../models/file.model.js');
 
 // Create a folder
 exports.create = (req, res) => {
