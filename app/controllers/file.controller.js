@@ -146,32 +146,24 @@ exports.delete = (req, res) => {
     if (!req.params.id) {
         return res.status(400).send({
             success: false,
-            message: 'Folder id needed for update'
+            message: 'File id needed for deletion'
         });
     }
 
-    let folderId = req.params.id;
+    let fileId = req.params.id;
 
-    Folder.findByIdAndRemove(folderId)
-    .then(async folder => {
-        if (!folder) {
+    File.findByIdAndRemove(fileId)
+    .then(async file => {
+        if (!file) {
             return res.status(404).send({
                 success: false,
-                message: `Folder not found with id ${folderId}`
+                message: `File not found with id ${fileId}`
             });
         }
 
-        // delete all subfolders
-        await SubFolder.deleteMany({
-            folder: folder.id
-        });
-
-        // delete all files associated also
-        // *********************************
-
         res.status(200).send({
             success: true,
-            message: 'Folder deleted successfully',
+            message: 'File deleted successfully',
         });
     })
 };

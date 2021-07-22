@@ -102,7 +102,7 @@ exports.delete = (req, res) => {
     if (!req.params.id) {
         return res.status(400).send({
             success: false,
-            message: 'Folder id needed for update'
+            message: 'Folder id needed for deletion'
         });
     }
 
