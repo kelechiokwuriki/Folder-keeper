@@ -30,9 +30,10 @@ exports.create = (req, res) => {
 
 // Retrieve and return all folders.
 exports.all = (req, res) => {
+    /**&&&&&&&&&&&&&&&& INCLUDE COUNT OF FILES IN FOLDERS AND SUB FOLDERS*/
     Folder.find()
     .then(folders => {
-        res.send({
+        res.status(200).send({
             success: true,
             message: 'All folders retrieved',
             data: folders
@@ -46,17 +47,61 @@ exports.all = (req, res) => {
     })
 };
 
-// Find a single note with a noteId
+// Find a folder note with a folder id
 exports.findOne = (req, res) => {
 
 };
 
-// Update a note identified by the noteId in the request
+// Update a folder identified by the noteId in the request
 exports.update = (req, res) => {
+    // validate request
+    if (!req.body.name) {
+        return res.status(400).send({
+            success: false,
+            message: 'Folder name cannot be empty'
+        });
+    }
 
+    if (!req.params.id) {
+        return res.status(400).send({
+            success: false,
+            message: 'Folder id needed for update'
+        });
+    }
+
+    let folderId = req.params.id;
+    let name = req.body.name;
+
+    Folder.findByIdAndUpdate(folderId, {
+        name: name || 'Untitled'
+    }, { new: true })
+    .then(folder => {
+        if (!folder) {
+            return res.status(404).send({
+                success: false,
+                message: `Folder not found with id ${folderId}`
+            })
+        }
+
+        res.status(201).send({
+            success: true,
+            message: 'Folder updated successfully',
+            data: folder
+        });
+    }).catch(error => {
+        if(error.kind === 'ObjectId') {
+            return res.status(404).send({
+                success: false,
+                message: `Folder not found with id ${folderId}`
+            })               
+        }
+        return res.status(500).send({
+            message: `Error updating folder with id ${folderId}`
+        });
+    })
 };
 
-// Delete a note with the specified noteId in the request
+// Delete a folder with the specified id in the request
 exports.delete = (req, res) => {
 
 };
