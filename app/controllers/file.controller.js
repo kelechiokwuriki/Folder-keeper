@@ -76,6 +76,20 @@ exports.create = (req, res) => {
 
 // Retrieve and return all files.
 exports.all = async (req, res) => {
+    if (req.query.name) {
+        const name = req.query.name;
+
+        const fileFound = await File.findOne({
+            name
+        }).populate('folder').populate('subFolder');
+
+        return res.status(200).send({
+            success: true,
+            message: "File retrieved",
+            data: fileFound
+        });
+    }
+
     File.find().populate("folder").populate("subFolder")
     .then(files => {
         res.status(200).send({
@@ -136,6 +150,7 @@ exports.update = (req, res) => {
         });
     })
 };
+
 
 // Delete a file with the specified id in the request
 exports.delete = (req, res) => {
