@@ -1,6 +1,6 @@
 const Folder = require('../models/folder.model.js');
 
-// Create and Save a new Note
+// Create a folder
 exports.create = (req, res) => {
     // validate request
     if (!req.body.name) {
@@ -10,9 +10,7 @@ exports.create = (req, res) => {
         });
     }
 
-    const newFolder = new Folder({
-        name: req.body.name || 'Untitled'
-    })
+    const newFolder = new Folder({ name: req.body.name || 'Untitled' })
 
     newFolder.save()
     .then(folder => {
@@ -24,15 +22,28 @@ exports.create = (req, res) => {
     }).catch(error => {
         res.status(500).send({
             success: false,
-            message: 'Failed to create the folder'
+            message: 'Failed to create the folder',
+            error: error
         })
     })
-
 };
 
-// Retrieve and return all notes from the database.
+// Retrieve and return all folders.
 exports.all = (req, res) => {
-
+    Folder.find()
+    .then(folders => {
+        res.send({
+            success: true,
+            message: 'All folders retrieved',
+            data: folders
+        });
+    }).catch(error => {
+        res.status(500).send({
+            success: false,
+            message: 'Failed to retrieve all folders',
+            error: error
+        });
+    })
 };
 
 // Find a single note with a noteId
