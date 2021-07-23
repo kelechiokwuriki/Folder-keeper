@@ -10,7 +10,5 @@ Create a mongodb database named "folder-keeper"
 - Type npm install
 - Type npm run dev
 
-
-
 # API DOC
 https://documenter.getpostman.com/view/1893514/TzsYP9rY
