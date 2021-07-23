@@ -1,7 +1,10 @@
 const File = require('../models/file.model.js');
+const SubFolder = require('../models/subfolder.model.js');
+const Folder = require('../models/folder.model.js');
+
 
 // Create a file
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
     // validate request
     if (!req.body.name) {
         return res.status(400).send({
@@ -15,24 +18,30 @@ exports.create = (req, res) => {
     if (!folderType) {
         return res.status(400).send({
             success: false,
-            message: 'Please specfiy folder type'
+            message: 'Please specfiy folder type in query'
         });
     }
 
+
     let newFile;
+    let folderFound;
 
     switch (folderType) {
         case 'folder': {
             if (!req.body.folder) {
                 return res.status(400).send({
                     success: false,
-                    message: 'File needs a folder'
+                    message: 'File needs a folder, please add to request body'
                 });
             }
             newFile = new File({ 
                 name: req.body.name || 'Untitled',
                 folder: req.body.folder,
             });
+
+            folderFound = await Folder.findOne({
+                _id: req.body.folder
+            })
         }
         break;
 
@@ -40,13 +49,17 @@ exports.create = (req, res) => {
             if (!req.body.subFolder) {
                 return res.status(400).send({
                     success: false,
-                    message: 'File needs a sub folder'
+                    message: 'File needs a sub folder, please add to request body'
                 });
             }
             newFile = new File({ 
                 name: req.body.name || 'Untitled',
                 subFolder: req.body.subFolder,
             });
+
+            folderFound = await SubFolder.findOne({
+                _id: req.body.subFolder
+            })
         }
         break;
 
@@ -60,6 +73,11 @@ exports.create = (req, res) => {
 
     newFile.save()
     .then(file => {
+        // make association to folder
+        folderFound.files.push(file.id);
+
+        folderFound.save();
+
         res.status(201).send({
             success: true,
             message: 'File created successfully',
@@ -83,10 +101,17 @@ exports.all = async (req, res) => {
             name
         }).populate('folder').populate('subFolder');
 
-        return res.status(200).send({
-            success: true,
-            message: "File retrieved",
-            data: fileFound
+        if (fileFound) {
+            return res.status(200).send({
+                success: true,
+                message: "File retrieved",
+                data: fileFound
+            });
+        }
+
+        return res.status(404).send({
+            success: false,
+            message: `Failed to find file with name ${name}`,
         });
     }
 
@@ -98,7 +123,7 @@ exports.all = async (req, res) => {
             data: files
         });
     }).catch(error => {
-        res.status(500).send({
+        res.status(404).send({
             success: false,
             message: 'Failed to retrieve all files',
             error: error
@@ -136,8 +161,6 @@ exports.update = (req, res) => {
             data: file
         });
     }).catch(error => {
-        console.log(error);
-
         if(error.kind === 'ObjectId') {
             return res.status(404).send({
                 success: false,
@@ -146,7 +169,6 @@ exports.update = (req, res) => {
         }
         return res.status(500).send({
             message: `Error updating file with id ${fileId}`,
-            error: error
         });
     })
 };

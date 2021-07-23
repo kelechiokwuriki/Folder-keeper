@@ -32,20 +32,40 @@ exports.create = (req, res) => {
 // Retrieve and return all folders.
 exports.all = async (req, res) => {
     /**&&&&&&&&&&&&&&&& INCLUDE COUNT OF FILES IN FOLDERS AND SUB FOLDERS*/
-    Folder.find().populate("subFolders")
-    .then(folders => {
-        res.status(200).send({
-            success: true,
-            message: 'All folders retrieved',
-            data: folders
-        });
-    }).catch(error => {
-        res.status(500).send({
+    const folders = await Folder.find().lean().populate("subFolders").populate("files");
+
+    const foldersWithFileCount = folders.map(folder => {
+        folder.fileCount = folder.files.length;
+
+        return folder;
+    });
+
+    const addSubFolderCountToResult = foldersWithFileCount.map(folder => {
+        folder.subFolders = folder.subFolders.map(subFolderItem => {
+            subFolderItem.subFolderFilesCount = subFolderItem.hasOwnProperty('files') ? subFolderItem.files.length : 0;
+            return subFolderItem;
+        })
+
+        return folder;
+    });
+
+    // console.log(addSubFolderCountToResult);
+
+    if (!folders) {
+        return res.status(404).send({
             success: false,
             message: 'Failed to retrieve all folders',
             error: error
-        });
-    })
+        });     
+    }
+
+    return res.status(200).send({
+        success: true,
+        message: 'All folders retrieved',
+        data: addSubFolderCountToResult
+    });
+
+   
 };
 
 // Update a folder 
