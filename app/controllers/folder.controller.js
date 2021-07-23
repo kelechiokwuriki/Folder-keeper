@@ -31,7 +31,8 @@ exports.create = (req, res) => {
 
 // Retrieve and return all folders.
 exports.all = async (req, res) => {
-    /**&&&&&&&&&&&&&&&& INCLUDE COUNT OF FILES IN FOLDERS AND SUB FOLDERS*/
+    // lean so we convert mongose object to plain js object
+    // https://stackoverflow.com/questions/7503450/how-do-you-turn-a-mongoose-document-into-a-plain-object
     const folders = await Folder.find().lean().populate("subFolders").populate("files");
 
     const foldersWithFileCount = folders.map(folder => {
@@ -49,8 +50,6 @@ exports.all = async (req, res) => {
         return folder;
     });
 
-    // console.log(addSubFolderCountToResult);
-
     if (!folders) {
         return res.status(404).send({
             success: false,
@@ -64,8 +63,6 @@ exports.all = async (req, res) => {
         message: 'All folders retrieved',
         data: addSubFolderCountToResult
     });
-
-   
 };
 
 // Update a folder 

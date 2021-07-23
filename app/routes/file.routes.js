@@ -15,4 +15,7 @@ module.exports = (app) => {
 
     //delete a file
     app.delete('/files/:id', fileController.delete);
+
+    // // search for file that starts with
+    // app.get('/files/')
 }

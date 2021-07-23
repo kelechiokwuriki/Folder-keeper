@@ -94,41 +94,47 @@ exports.create = async (req, res) => {
 
 // Retrieve and return all files.
 exports.all = async (req, res) => {
+    let query = {};
+    let startsWith;
+
     if (req.query.name) {
-        const name = req.query.name;
+        query.name = req.query.name;
+    }
 
-        const fileFound = await File.findOne({
-            name
-        }).populate('folder').populate('subFolder');
-
-        if (fileFound) {
-            return res.status(200).send({
-                success: true,
-                message: "File retrieved",
-                data: fileFound
-            });
-        }
-
-        return res.status(404).send({
+    // cant use both name searches
+    if (req.query.startsWith && req.query.name) {
+        return res.status(400).send({
             success: false,
-            message: `Failed to find file with name ${name}`,
+            message: 'Can not use starts with and name query in tandem.',
         });
     }
 
-    File.find().populate("folder").populate("subFolder")
-    .then(files => {
-        res.status(200).send({
-            success: true,
-            message: 'All files retrieved',
-            data: files
-        });
-    }).catch(error => {
+    if (req.query.startsWith) {
+        startsWith = req.query.startsWith;
+        query.name = { $regex: '.*' + startsWith + '.*' };
+    }
+
+    const fileQuery = File.find(query);
+
+    fileQuery.populate("folder").populate("subFolder")
+
+    // limit by 10 if starts with is in query
+    if (startsWith) {
+        fileQuery.limit(10);
+    }
+
+    if (!fileQuery) {
         res.status(404).send({
             success: false,
             message: 'Failed to retrieve all files',
-            error: error
         });
-    })
+    }
+
+    res.status(200).send({
+        success: true,
+        message: 'All files retrieved',
+        data: await fileQuery
+    });
 };
 
 // Update file 
