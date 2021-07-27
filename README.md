@@ -1,14 +1,12 @@
 # Folder-keeper
 An app for folder, subfolders and files management.
 
-# Database 
-Folder Keeper needs a database to run.
-Create a mongodb database named "folder-keeper"
+# Docker
+This application is containerized using Docker.
+Ensure you have docker desktop installed and running.
 
 # Start server
-- Navigate to root folder.
-- Type npm install
-- Type npm run dev
-
-# API DOC
-https://documenter.getpostman.com/view/1893514/TzsYP9rY
+On your terminal, navigate to the Trubase directory.
+Type
+1. docker-compose build
+2. docker-compose up
